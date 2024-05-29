@@ -1,0 +1,7 @@
+venv/
+.env
+warning.log
+
+\cmod_data.cpython-312.pyc
+\cmod_web.cpython-312.pyc
+\request.cpython-312.pyc
