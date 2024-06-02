@@ -945,8 +945,27 @@ class ChromeDriverMan:
         for i in range(len(pdf_files)):
             
             pdf_file = os.path.join(file_path_outros, pdf_files[i])
-            text = self.data_man.read_pdf(pdf_file)
+            #text = self.data_man.read_pdf(pdf_file)
+            text = self.data_man.extract_text_from_pdf(pdf_file)
+            
+            lines = text.strip().split('\n')
+            lines = [line for line in lines if line.strip()]
+            max_columns = 0
+            for line in lines:
+                columns = line.split(',')
+                if len(columns) > max_columns:
+                    max_columns = len(columns)
+            data = []
+            for line in lines:
+                columns = line.split(',')
+                while len(columns) < max_columns:
+                    columns.append('')
+                data.append(columns)
+
+            df = pd.DataFrame(data)
+
             breakpoint()
+
 
 
 

@@ -12,7 +12,9 @@ import logging
 import time
 from request import Connect
 import PyPDF2
-from PyPDF2 import PdfFileReader
+from PyPDF2 import PdfReader
+import fitz
+
 
 logging.basicConfig(filename='warning.log', level = logging.INFO, format = '%(asctime)s - %(levelname)s - %(message)s')
 
@@ -211,15 +213,21 @@ class DataManager:
             
             with open(file_path, 'rb') as file:
                 
-                reader = PyPDF2.PdfReader(file)
+                pdf = PdfReader(file)
                 
-                if reader.isEncrypted:
-                    reader.decrypt('')
+                information = pdf.metadata
+                number_of_pages = len(pdf.pages)                
+
+                #reader = PyPDF2.PdfReader(file)
+                
+                if pdf.is_encrypted:
+                    pdf.decrypt('')
                                 
                 text = ''
                 
-                for page_num in range(reader.numPages):
-                    page = reader.getPage(page_num)
+                for page_num in range(number_of_pages):
+                    #page = pdf.getPage(page_num)
+                    page = pdf.pages[page_num]
                     text += page.extract_text()
                 
                 return text
@@ -243,6 +251,24 @@ class DataManager:
         return pdf_files
            
 
+    def extract_text_from_pdf(self, file_path):
+        try:
+            document = fitz.open(file_path)
+            text = ''
+            for page_num in range(document.page_count):
+                
+                page = document.load_page(page_num)
+                text += page.get_text()
+            return text
+        
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            logging.error("Ocorreu um erro na leitura do conteúdo do pdf na lista")
+            return None
 
+    # Substitua 'path/to/your/file.pdf' pelo caminho do seu arquivo PDF
+    
+    
+    
     
     
