@@ -11,6 +11,8 @@ from datetime import datetime
 import logging
 import time
 from request import Connect
+import PyPDF2
+from PyPDF2 import PdfFileReader
 
 logging.basicConfig(filename='warning.log', level = logging.INFO, format = '%(asctime)s - %(levelname)s - %(message)s')
 
@@ -51,7 +53,8 @@ class DataManager:
     def create_file(self, root, new_file_name):
                     
             df = pd.DataFrame()            
-            name_file = root+'\\'+new_file_name+'.xlsx'
+            #name_file = root+'\\'+new_file_name+'.xlsx'
+            name_file = root
             try:
                 df.to_excel(name_file, index=False)
                 print("Arquivo de controle de processados criado com sucesso! ('\U0001F603')")
@@ -80,12 +83,10 @@ class DataManager:
     def get_item_list(self, root, file_name):
         
         try:
-            excel_file = root+'\\'+file_name+'.xlsx'
+            excel_file = root
             column_name = 'Nosso numero'
-            df = pd.read_excel(excel_file)
-            #row = int(row)
-            #item_exists = row in df[column_name].values 
-            files = [file for file in df[column_name].values ]                        
+            df = pd.read_excel(excel_file)            
+            files = [file for file in df[column_name].values]                        
             return files
         except:
             print(f"Nao foi possivel verificar a existencia do arquivo, tente novamente ou verifique o nome e local do arquivo {excel_file}")
@@ -114,6 +115,7 @@ class DataManager:
         
 
         columns = ['TASK', 'PERIODO_INICIAL', 'PERIODO_FINAL', 'BANCO', 'AGENCIA', 'CONTA', 'DIGITO', 'RAZAO', 'NOME', 'NUM_DOCUMENTOS', 'NUM_PAGINAS', 'CURR_PAGE', 'CURR_LINE', 'STATUS', 'HOST', 'PROCESSO', 'CURR_DOC', 'GUID']
+        
         row_data = list(rows[-1])
         new_row = [row_data]
         df = pd.DataFrame(new_row, columns=columns)
@@ -126,16 +128,7 @@ class DataManager:
             xlsx_files = [file for file in all_files if file.endswith('.xlsx')]
 
 
-            '''if len(xlsx_files) == 1:
-                file_path = network_directory+'\\'+xlsx_files[0]
-                df = pd.read_excel(file_path)
-
-            else:
-                print("ERRO! Verifique a pasta 'DOCUMENTOS BAIXA' e certifique-se de haver apenas um arquivo '.xlsx' na raiz")
-                return logging.error("ERRO! Verifique a pasta 'DOCUMENTOS BAIXA' e certifique-se de haver apenas um arquivo '.xlsx' na raiz")
-
-            num_rows, num_columns = df.shape'''
-
+           
             
 
             task_name = df.iloc[row,0]
@@ -211,7 +204,44 @@ class DataManager:
         
         return date_string1, date_string2, ag, cc, network_directory, list_of_subdir
     
-    
+
+    def read_pdf(self, file_path):
+
+        try:
+            
+            with open(file_path, 'rb') as file:
+                
+                reader = PyPDF2.PdfReader(file)
+                
+                if reader.isEncrypted:
+                    reader.decrypt('')
+                                
+                text = ''
+                
+                for page_num in range(reader.numPages):
+                    page = reader.getPage(page_num)
+                    text += page.extract_text()
+                
+                return text
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            logging.error("Ocorreu um erro na leitura do conteúdo do pdf na lista")
+            return None
+
+
+    def pdf_quantity(self, files_path):
+
+        network_directory = files_path        
+        all_files = os.listdir(network_directory)
+
+        pdf_files = [file for file in all_files if file.lower().endswith('.pdf')]
+        
+        '''lin_files = [file for file in all_files if file.endswith('.lin')]                
+        txt_files = [file for file in all_files if file.endswith('.txt')] 
+        tmp_files = [file for file in all_files if file.endswith('.tmp')]'''
+
+        return pdf_files
+           
 
 
     

@@ -29,7 +29,16 @@ driver = ch_driver.get_driver()
 ch_driver.get_page()
 ch_driver.login()
 task_path, list_of_dir = ch_driver.fill_information_cmod(0)
-#ch_driver.get_item_list(list_of_dir[0])
+
+for ieacht in list_of_dir:
+    if ieacht == '\\\\192.168.24.17\\Carga\\Bradesco\\CPI\\LANBACEM-TI\\DOCUMENTOS FRANCESINHA\\TASK0584550\\Controle':
+        
+        ch_driver.rename_n_save(ieacht)
+        
+    else:
+        pass
+
+ch_driver.get_item_list(list_of_dir[0])
 ch_driver.add_card()
 
 

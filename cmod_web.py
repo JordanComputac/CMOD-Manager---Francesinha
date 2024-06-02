@@ -678,6 +678,8 @@ class ChromeDriverMan:
         all_files = os.listdir(network_directory)
         name_file = itens_path+'\\'+'controle.xlsx'
         
+        breakpoint()
+
         time.sleep(3)
         self.organize_by_date()
         
@@ -700,8 +702,8 @@ class ChromeDriverMan:
 
         else:
             
-            self.data_man.create_file(itens_path, 'controle')      
-            print("Arquivo controle criado") 
+            self.data_man.create_file(itens_path, 'controle')
+            print("Arquivo controle criado")
             time.sleep(5)
        
             print("Arquivo controle nao pode contar elementos/itens, arquivo 'controle' sera populado")
@@ -841,8 +843,9 @@ class ChromeDriverMan:
             try:       
                 
                 time.sleep(5)
-                actions = ActionChains(self.driver)         
-                #organize_files_box = WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.XPATH, "//span[contains(@class, 'dijitReset dijitInline dijitButtonNode') and @data-dojo-attach-event='ondijitclick:__onClick']")))
+                actions = ActionChains(self.driver)      
+                #organize_files_box = WebDriverWait(self.drive
+                # r, 30).until(EC.presence_of_element_located((By.XPATH, "//span[contains(@class, 'dijitReset dijitInline dijitButtonNode') and @data-dojo-attach-event='ondijitclick:__onClick']")))
                 organize_files_box = WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.XPATH, "//span[@id = 'ADDTOSUNRISECARTACTION_dijit_form_Button_0']")))
                 organize_files_box.click()
                 
@@ -916,7 +919,37 @@ class ChromeDriverMan:
                 logging.error("Elemento nao encontrado, verificar a existencia e posicao de identificador:")
 
             
-           
+    def rename_n_save(self, file_path_outros):
+
+        name_file = file_path_outros+'\\'+'controle.xlsx'
+
+        if os.path.isfile(name_file):
+            
+            print("O arquivo de controle ja existe")  
+            try:
+                    
+                values = self.data_man.get_item_list(name_file, 'controle')                
+                                          
+                time.sleep(1)   
+
+            except:
+                print("Não foram encontrados valores dentro do arquivo de controle.xlsx no diretório controle")
+                logging.warning("Nao foram encontrados valores dentro do arquivo de controle.xlsx no diretorio controle")       
+
+        else:
+            
+            self.data_man.create_file(name_file, 'controle')
+        
+        pdf_files = self.data_man.pdf_quantity(file_path_outros)
+
+        for i in range(len(pdf_files)):
+            
+            pdf_file = os.path.join(file_path_outros, pdf_files[i])
+            text = self.data_man.read_pdf(pdf_file)
+            breakpoint()
+
+
+
         
        
 
