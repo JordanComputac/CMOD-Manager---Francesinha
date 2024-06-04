@@ -32,13 +32,13 @@ task_path, list_of_dir = ch_driver.fill_information_cmod(0)
 
 for ieacht in list_of_dir:
     if ieacht == '\\\\192.168.24.17\\Carga\\Bradesco\\CPI\\LANBACEM-TI\\DOCUMENTOS FRANCESINHA\\TASK0584550\\Controle':
-        
-        ch_driver.rename_n_save(ieacht)
-        
+        ch_driver.rename_n_save(ieacht)            
     else:
+        print("O caminho para o diretorio de controle pode estar corrompido")
+        logging.warning("O caminho para o diretorio de controle pode estar corrompido")
         pass
-
-ch_driver.get_item_list(list_of_dir[0])
+    
+#ch_driver.get_item_list(list_of_dir[0])
 ch_driver.add_card()
 
 

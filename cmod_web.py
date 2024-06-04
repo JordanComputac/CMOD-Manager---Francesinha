@@ -398,101 +398,31 @@ class ChromeDriverMan:
                 logging.error("Tirando print e salvando ultima interacao...")
                 return logging.error("Houve um erro ao organizar os itens por data devido a demora de carregamento da pagina; é recomendado reiniciar o robo.")
     
-    def rename_it(self, file_path):
+    def rename_it(self, file_path, date_emissao):
         
+        
+        formatted_date = date_emissao.replace('/', '.')
+        directory = os.path.dirname(file_path)
+        new_file_path = os.path.join(directory, formatted_date+'.pdf')
+
+        if os.path.exists(new_file_path):
+            ino = 0
+            while os.path.exists(new_file_path):
+                ino = ino + 1
+                print("valor de ino controle de quantidade de arquivos com mesma data de emissao: ", ino)
+                new_file_path = os.path.join(directory, formatted_date+f' {ino}.pdf')
         try:
-            df = pd.read_table(file_path, header = None)
-            
-            one = df.iloc[2,0]
-            new_one = re.sub(r'\s+', ' ', one)
-            parts = new_one.split()
-            data_str = parts[-1]
-            data_str = data_str.replace('/','-')
-            
-            one = df.iloc[4,0]
-            new_one = re.sub(r'\s+', ' ', one)
-            parts = new_one.split()
-            n_numero = parts[5]
-            n_numero = n_numero.split('-')[0]
+            os.rename(file_path, new_file_path)
+            print(f"Um arquivo foi renomeado de {file_path} para {new_file_path}")
+            return formatted_date
+        
+        except FileNotFoundError:
+            print(f"Arquivo {file_path} nao encontrado no diretorio {directory}")
+            logging.error(f"Arquivo {file_path} nao encontrado no diretorio {directory}")
+        except Exception as e:
+            print(f"Ocorreu um erro enquanto renomeava o arquivo {e}")
+            logging.error(f"Ocorreu um erro enquanto renomeava o arquivo {e}")
 
-            one = df.iloc[4,0]
-            new_one = re.sub(r'\s+', ' ', one)
-            parts = new_one.split()
-            valor_cobrado = parts[8]
-
-            
-
-            new_name = '\\'+data_str+' '+ valor_cobrado
-            
-            old_file_name = file_path
-            last_slash_index = old_file_name.rfind('\\')
-            new_variable = old_file_name[:last_slash_index]
-
-            #new_file_path = new_variable + new_name + '.txt'
-            new_file_path = new_variable + new_name + ' ('+ n_numero+ ')' + '.txt'
-            
-            
-            if os.path.exists(new_file_path):               
-                
-                print(f"O arquivo {new_file_path} já foi criado")
-                os.remove(file_path)
-
-            else:                   
-                
-                if len(n_numero) == 13:
-                    os.rename(file_path, new_file_path)
-                else:
-                    one = df.iloc[4,0]
-                    new_one = re.sub(r'\s+', ' ', one)
-                    parts = new_one.split()
-                    n_numero = parts[4]
-                    n_numero = n_numero.split('-')[0]
-
-                    if len(n_numero) != 13:
-                        n_numero = parts[3]
-                        n_numero = n_numero.split('-')[0]
-                    else:
-                        pass
-
-
-                    one = df.iloc[4,0]
-                    new_one = re.sub(r'\s+', ' ', one)
-                    parts = new_one.split()
-                    valor_cobrado = parts[7]
-
-                    if not ',' in valor_cobrado:
-                        valor_cobrado = parts[6]
-                        
-                    else:
-                        pass
-
-
-                    new_name = '\\'+data_str+' '+ valor_cobrado
-
-                    old_file_name = file_path
-                    last_slash_index = old_file_name.rfind('\\')
-                    new_variable = old_file_name[:last_slash_index]
-
-                    #new_file_path = new_variable + new_name + '.txt'
-                    new_file_path = new_variable + new_name + ' ('+ n_numero+ ')' + '.txt'
-                    os.rename(file_path, new_file_path)
-                    pass               
-                    
-
-
-
-
-
-            '''if result is not None:
-                new_path, n_numero = result
-            else:
-                print(f"Error occurred during renaming of the file {file_path}")'''
-
-            return new_file_path, n_numero
-
-        except:
-            print(f"Houve um erro na renomeacao do arquivo {file_path}")
-            return logging.error(f"Houve um erro na renomeacao do arquivo {file_path}")
 
     def find_element_position(self, lst, target):
         for i, element in enumerate(lst):
@@ -678,7 +608,7 @@ class ChromeDriverMan:
         all_files = os.listdir(network_directory)
         name_file = itens_path+'\\'+'controle.xlsx'
         
-        breakpoint()
+        
 
         time.sleep(3)
         self.organize_by_date()
@@ -852,7 +782,7 @@ class ChromeDriverMan:
                 time.sleep(10)
                 
                 if i == 0:
-                    breakpoint()
+                    time.sleep(5)
                 
                 '''if i == 1:
                     try:
@@ -918,7 +848,7 @@ class ChromeDriverMan:
                 print("Elemento nao encontrado, verificar a existencia e posicao de identificador:", e)
                 logging.error("Elemento nao encontrado, verificar a existencia e posicao de identificador:")
 
-            
+    
     def rename_n_save(self, file_path_outros):
 
         name_file = file_path_outros+'\\'+'controle.xlsx'
@@ -926,52 +856,66 @@ class ChromeDriverMan:
         if os.path.isfile(name_file):
             
             print("O arquivo de controle ja existe")  
-            try:
-                    
-                values = self.data_man.get_item_list(name_file, 'controle')                
-                                          
+            '''try:                    
+                values = self.data_man.get_item_list(name_file, 'controle')                                          
                 time.sleep(1)   
+                
 
             except:
                 print("Não foram encontrados valores dentro do arquivo de controle.xlsx no diretório controle")
-                logging.warning("Nao foram encontrados valores dentro do arquivo de controle.xlsx no diretorio controle")       
+                logging.warning("Nao foram encontrados valores dentro do arquivo de controle.xlsx no diretorio controle")       '''
 
-        else:
-            
+        else:            
             self.data_man.create_file(name_file, 'controle')
         
         pdf_files = self.data_man.pdf_quantity(file_path_outros)
+                
+        pattern2 = r'^\d{2}\.\d{2}\.\d{4}\.pdf$'       
+        pattern3 = r'^\d{2}\.\d{2}\.\d{4} \d+\.pdf$'
+        new_file_handle = [file for file in pdf_files if not re.match(pattern2, file) and not re.match(pattern3, file)]
+  
+        if new_file_handle:
+            for i in range(len(new_file_handle)):
+                
+                breakpoint()
+                pdf_file = os.path.join(file_path_outros, new_file_handle[i])
+                #text = self.data_man.read_pdf(pdf_file)
+                df = self.data_man.extract_text_from_pdf(pdf_file)
+                date_emissao = self.data_man.get_date_from_df(df)
+                cl_info_dict, indices, status = self.data_man.get_linhas_cl(df, file_path_outros)
+                if status == False:
+                    formatted_date = self.rename_it(pdf_file, date_emissao)
+                    
+                    time.sleep(1)
+                    if formatted_date:
 
-        for i in range(len(pdf_files)):
+                        dir = os.path.dirname(file_path_outros)
+                        old_dir = dir + f'\\Controle\\{formatted_date}.pdf'
+
+                        if 2 in indices:
+                            new_dir = dir + f'\\CL - 2\\{formatted_date}.pdf'
+                        else:
+                            new_dir = dir + f'\\CL - OUTROS\\{formatted_date}.pdf'
+                        self.data_man.send_file(old_dir,new_dir)
+                    else:
+                        print("Nao foi possivel fazer mudanca de diretorio")
+                else:
+                    print(f"O arquivo {pdf_file} já foi renomeado e inserido no devido diretorio de destino")
+
+        else:
+            print("The list is empty.")
+        
+        return print("itens renomeados e movidos com sucesso")
+    
+
             
-            pdf_file = os.path.join(file_path_outros, pdf_files[i])
-            #text = self.data_man.read_pdf(pdf_file)
-            text = self.data_man.extract_text_from_pdf(pdf_file)
-            
-            lines = text.strip().split('\n')
-            lines = [line for line in lines if line.strip()]
-            max_columns = 0
-            for line in lines:
-                columns = line.split(',')
-                if len(columns) > max_columns:
-                    max_columns = len(columns)
-            data = []
-            for line in lines:
-                columns = line.split(',')
-                while len(columns) < max_columns:
-                    columns.append('')
-                data.append(columns)
-
-            df = pd.DataFrame(data)
-
-            breakpoint()
 
 
 
 
         
        
-
+ 
     
 '''if __name__ == "__main__":    
     chrome_driver_manager = ChromeDriverMan()

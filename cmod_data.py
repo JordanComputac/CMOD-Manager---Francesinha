@@ -14,6 +14,7 @@ from request import Connect
 import PyPDF2
 from PyPDF2 import PdfReader
 import fitz
+import shutil
 
 
 logging.basicConfig(filename='warning.log', level = logging.INFO, format = '%(asctime)s - %(levelname)s - %(message)s')
@@ -53,16 +54,21 @@ class DataManager:
 
 
     def create_file(self, root, new_file_name):
-                    
+                                
             df = pd.DataFrame()            
             #name_file = root+'\\'+new_file_name+'.xlsx'
             name_file = root
             try:
                 df.to_excel(name_file, index=False)
+                column_names = ['gen_infos', 'cl_number']
+                df = pd.DataFrame(columns=column_names)
+                df.to_excel(name_file, index=False)
                 print("Arquivo de controle de processados criado com sucesso! ('\U0001F603')")
             except:
                 print(f"Houve um problema ao criar o arquivo {new_file_name} no diretorio fornecido {root}")
                 logging.error(f"Houve um problema ao criar o arquivo {new_file_name} no diretorio fornecido {root}")
+            
+            
 
 
     def update_row(self, root, file_name, nosso_numero):
@@ -98,12 +104,14 @@ class DataManager:
     def verify_item_existence(self, root, file_name, row):
         
         try:
-            excel_file = root+'\\'+file_name+'.xlsx'
-            column_name = 'Nosso numero'
+            #excel_file = root+'\\'+file_name+'.xlsx'
+            excel_file = root
+            column_name = 'gen_infos'
             df = pd.read_excel(excel_file)
-            row = int(row)
-            item_exists = row in df[column_name].values 
-            #files = [file for file in df[column_name].values ]            
+            row = str(row)
+            item_exists = row in df[column_name].values
+            #files = [file for file in df[column_name].values ]  
+            
             return item_exists
         except:
             print(f"Nao foi possivel verificar a existencia do arquivo, tente novamente ou verifique o nome e local do arquivo {excel_file}")
@@ -169,8 +177,12 @@ class DataManager:
             child_dir2_name = "CL - OUTROS"
             child_dir2 = os.path.join(main_dir_task, child_dir2_name)
             path_to2 = main_dir_task+"\\"+child_dir2_name
+
+            child_dir3_name = "CL - 2"
+            child_dir3 = os.path.join(main_dir_task, child_dir3_name)
+            path_to3 = main_dir_task+"\\"+child_dir3_name
             
-            list_of_subdir = [path_to1, path_to2]
+            list_of_subdir = [path_to1, path_to2, path_to3]
 
             if os.path.exists(main_dir_task):
                 print(f"O arquivo {task_name} já foi criado")
@@ -179,12 +191,16 @@ class DataManager:
                     print(f"O arquivo {path_to1} já existe no diretorio")                            
                 elif os.path.exists(path_to2):
                     print(f"O arquivo {path_to2} já existe no diretorio")
+                elif os.path.exists(path_to3):
+                    print(f"O arquivo {path_to3} já existe no diretorio")
                 else:
                     
                     try:                        
                         self.create_folder(main_dir_task, child_dir1_name)
                         time.sleep(1)
                         self.create_folder(main_dir_task, child_dir2_name)
+                        time.sleep(1)
+                        self.create_folder(main_dir_task, child_dir3_name)
                     except:
                         logging.error(f"ERRROR ao criar as subpastas dentro da pasta {task_name}")
 
@@ -197,6 +213,8 @@ class DataManager:
                     self.create_folder(main_dir_task, child_dir1_name)
                     time.sleep(1)
                     self.create_folder(main_dir_task, child_dir2_name)
+                    time.sleep(1)
+                    self.create_folder(main_dir_task, child_dir3_name)
                 except:
                     logging.error(f"ERRROR ao criar pasta {task_name} ou subpastas dentro da pasta {task_name}")
 
@@ -259,16 +277,115 @@ class DataManager:
                 
                 page = document.load_page(page_num)
                 text += page.get_text()
-            return text
+                lines = text.strip().split('\n')
+                lines = [line for line in lines if line.strip()]
+                max_columns = 0
+                for line in lines:
+                    columns = line.split(',')
+                    if len(columns) > max_columns:
+                        max_columns = len(columns)
+                data = []
+                for line in lines:
+                    columns = line.split(',')
+                    while len(columns) < max_columns:
+                        columns.append('')
+                    data.append(columns)
+
+                df = pd.DataFrame(data)
+            return df
         
         except Exception as e:
             print(f"An error occurred: {e}")
             logging.error("Ocorreu um erro na leitura do conteúdo do pdf na lista")
             return None
 
-    # Substitua 'path/to/your/file.pdf' pelo caminho do seu arquivo PDF
+    def get_date_from_df(self, df):
+        matches = re.findall(r'\d{2}/\d{2}/\d{4}', df[0][1])
+        if len(matches) >= 2:
+            second_date = matches[1]
+            print(second_date)
+        else:
+            print("Second date not found")
+        return second_date
+        
     
+    def update_excel_with_new_row(self, file_name, data_dict):
+      
+        try:            
+            existing_df = pd.read_excel(file_name)
+        except FileNotFoundError:                        
+            #existing_df = pd.DataFrame(columns=data_dict[0].keys())
+            existing_df = pd.DataFrame(columns = data_dict.keys())
+            print(f"{file_name} nao existia e precisou ser criado")
+            logging.warning(f"{file_name} nao existia e precisou ser criado")
+        
+        try:
+            new_data_list = [value for key, value in data_dict.items()]
+            new_row_df = pd.DataFrame([data_dict])
+            updated_df = pd.concat([existing_df, new_row_df], ignore_index=True)        
+            updated_df.to_excel(file_name, index=False)
+            return print("dados atualizados na lista de controle com sucesso! ")
+        except:
+            print("Atualizacao de dados de controle .xlsx nao ocorreu conforme planejado, há algum impeditivo")
+            logging.warning("Atualizacao de dados de controle .xlsx nao ocorreu conforme planejado, ha algum impeditivo")
+            
     
+            
+    def get_linhas_cl(self, df, file_path_outros):
+
+        file_name = file_path_outros+'\\controle.xlsx'
+        pattern = r'09/\d{2}/\d{3}\.\d{3}\.\d{3}'
+
+        indices = []
+        gen_infos = []
+        cl_numbers = []
+        info_pack = {'gen_infos': '', 'cl_number': ''}
+
+        for index, row in df.iterrows():
+            for col in df.columns:
+                if re.search(pattern, str(row[col])):
+                    indices.append(index)                   
+                    first_string = df.iloc[index,0]
+                    splitie =  first_string.split()
+                    nosso_numero = splitie[0]
+                    gen_infos.append(first_string)
+
+                    if nosso_numero != str(row[col][0]):
+                        print(f"Codigo regex {str(row[col])} diferente do valor encontrado em 'Nosso Numero' {str(nosso_numero)} ")
+                        #logging.warning("Codigo regex diferente do valor encontrado em 'Nosso Numero' ")
+                                        
+                    dirty_string = df.iloc[index, -3]
+                    cleaned_string = ' '.join(dirty_string.split())
+                    cleaned = cleaned_string.split()
+                    cl_number = cleaned[1]
+                    cl_numbers.append(cl_number)    
+                    
+                    
+                    info_pack1 = {'gen_infos': f'{first_string}', 'cl_number': f'{cl_number}'}   
+                    status = self.verify_item_existence(file_name, 'controle', f'{first_string}')
+
+                    if status == False:
+                        self.update_excel_with_new_row(file_name, info_pack1)
+                    else:        
+                        break    
+                    time.sleep(1)                    
+                    
+        if status == False:
+            info_pack = {'gen_infos': 'Lista de CLs ---> ', 'cl_number': f'{cl_numbers}'}
+            self.update_excel_with_new_row(file_name, info_pack)
+        
+        return info_pack, indices, status
     
+
+
+
     
-    
+    def send_file(self, file_path, new_file_path):
+        try:
+            shutil.move(file_path, new_file_path)
+            print(f"File moved from {file_path} to {new_file_path}")
+        except FileNotFoundError as e:
+            print(f"Error: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+
