@@ -350,8 +350,8 @@ class DataManager:
                     nosso_numero = splitie[0]
                     gen_infos.append(first_string)
 
-                    if nosso_numero != str(row[col][0]):
-                        print(f"Codigo regex {str(row[col])} diferente do valor encontrado em 'Nosso Numero' {str(nosso_numero)} ")
+                    if nosso_numero != str(row[col]).split()[0]:
+                        print(f"Codigo regex {str(row[col])[0]} diferente do valor encontrado em 'Nosso Numero' {str(nosso_numero)} ")
                         #logging.warning("Codigo regex diferente do valor encontrado em 'Nosso Numero' ")
                                         
                     dirty_string = df.iloc[index, -3]
@@ -373,7 +373,9 @@ class DataManager:
         if status == False:
             info_pack = {'gen_infos': 'Lista de CLs ---> ', 'cl_number': f'{cl_numbers}'}
             self.update_excel_with_new_row(file_name, info_pack)
-        
+        else:
+            print(f"O elemento {first_string} já existe e será pulado")
+            
         return info_pack, indices, status
     
 

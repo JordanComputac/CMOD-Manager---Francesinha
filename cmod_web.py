@@ -414,7 +414,7 @@ class ChromeDriverMan:
         try:
             os.rename(file_path, new_file_path)
             print(f"Um arquivo foi renomeado de {file_path} para {new_file_path}")
-            return formatted_date
+            return new_file_path
         
         except FileNotFoundError:
             print(f"Arquivo {file_path} nao encontrado no diretorio {directory}")
@@ -852,37 +852,52 @@ class ChromeDriverMan:
     def rename_n_save(self, file_path_outros):
 
         name_file = file_path_outros+'\\'+'controle.xlsx'
+        
 
-        if os.path.isfile(name_file):
-            
-            print("O arquivo de controle ja existe")  
-            '''try:                    
-                values = self.data_man.get_item_list(name_file, 'controle')                                          
-                time.sleep(1)   
-                
-
-            except:
-                print("Não foram encontrados valores dentro do arquivo de controle.xlsx no diretório controle")
-                logging.warning("Nao foram encontrados valores dentro do arquivo de controle.xlsx no diretorio controle")       '''
+        if os.path.isfile(name_file):            
+            print("O arquivo de controle ja existe")
 
         else:            
             self.data_man.create_file(name_file, 'controle')
         
         pdf_files = self.data_man.pdf_quantity(file_path_outros)
-                
+        
+
         pattern2 = r'^\d{2}\.\d{2}\.\d{4}\.pdf$'       
         pattern3 = r'^\d{2}\.\d{2}\.\d{4} \d+\.pdf$'
+        old_file_handle = [file for file in pdf_files if re.match(pattern2, file) or re.match(pattern3, file)]
+        
+        if old_file_handle:
+            
+            for i in range(len(old_file_handle)):
+
+                pdf_file = os.path.join(file_path_outros, old_file_handle[i])
+                df = self.data_man.extract_text_from_pdf(pdf_file)
+                cl_info_dict, indices, status = self.data_man.get_linhas_cl(df, file_path_outros)
+                dir = os.path.dirname(file_path_outros)
+                old_dir = pdf_file
+                #new_plus = os.path.basename(file_path_outros)
+
+                if 2 in indices:
+                    new_dir = dir + f'\\CL - 2\\{old_file_handle[i]}'
+                else:
+                    new_dir = dir + f'\\CL - OUTROS\\{old_file_handle[i]}'
+                time.sleep(1)
+                self.data_man.send_file(old_dir,new_dir)
+
         new_file_handle = [file for file in pdf_files if not re.match(pattern2, file) and not re.match(pattern3, file)]
   
         if new_file_handle:
             for i in range(len(new_file_handle)):
                 
-                breakpoint()
+                
                 pdf_file = os.path.join(file_path_outros, new_file_handle[i])
                 #text = self.data_man.read_pdf(pdf_file)
                 df = self.data_man.extract_text_from_pdf(pdf_file)
                 date_emissao = self.data_man.get_date_from_df(df)
                 cl_info_dict, indices, status = self.data_man.get_linhas_cl(df, file_path_outros)
+                
+
                 if status == False:
                     formatted_date = self.rename_it(pdf_file, date_emissao)
                     
@@ -890,16 +905,19 @@ class ChromeDriverMan:
                     if formatted_date:
 
                         dir = os.path.dirname(file_path_outros)
-                        old_dir = dir + f'\\Controle\\{formatted_date}.pdf'
+                        old_dir = formatted_date
+                        new_plus = os.path.basename(formatted_date)
 
                         if 2 in indices:
-                            new_dir = dir + f'\\CL - 2\\{formatted_date}.pdf'
+                            new_dir = dir + f'\\CL - 2\\{new_plus}'
                         else:
-                            new_dir = dir + f'\\CL - OUTROS\\{formatted_date}.pdf'
+                            new_dir = dir + f'\\CL - OUTROS\\{new_plus}'
+                        time.sleep(1)
                         self.data_man.send_file(old_dir,new_dir)
                     else:
                         print("Nao foi possivel fazer mudanca de diretorio")
                 else:
+                    os.remove(pdf_file)
                     print(f"O arquivo {pdf_file} já foi renomeado e inserido no devido diretorio de destino")
 
         else:
