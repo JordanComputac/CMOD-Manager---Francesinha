@@ -81,14 +81,7 @@ class Connect:
         if connection is None:
             return
 
-        # Data to be inserted
-        data = {
-            'id': 1,
-            'name': 'John Doe',
-            'join_date': '2023-01-01'
-            }
-
-        # Insert data into the table
+        
         #self.insert_data(connection, table, data)
         
         # Select data from the table

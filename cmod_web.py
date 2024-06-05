@@ -216,8 +216,7 @@ class ChromeDriverMan:
             
             ag_field = self.driver.find_elements(By.XPATH, "//input[@title='Conta']" )
             select_ag_field = ag_field[0]
-            select_ag_field.send_keys(new_cc)
-            
+            select_ag_field.send_keys(new_cc)            
             
             btn_search = driver.find_element(By.XPATH, "//span[@widgetid='dijit_form_Button_2']")
             btn_search.click()
@@ -899,6 +898,7 @@ class ChromeDriverMan:
                 
 
                 if status == False:
+                    
                     formatted_date = self.rename_it(pdf_file, date_emissao)
                     
                     time.sleep(1)
@@ -918,7 +918,7 @@ class ChromeDriverMan:
                         print("Nao foi possivel fazer mudanca de diretorio")
                 else:
                     os.remove(pdf_file)
-                    print(f"O arquivo {pdf_file} já foi renomeado e inserido no devido diretorio de destino")
+                    print(f"O arquivo {pdf_file} já foi renomeado e inserido no devido diretorio de destino, excluindo arquivo...")
 
         else:
             print("The list is empty.")

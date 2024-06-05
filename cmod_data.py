@@ -126,7 +126,7 @@ class DataManager:
 
         columns = ['TASK', 'PERIODO_INICIAL', 'PERIODO_FINAL', 'BANCO', 'AGENCIA', 'CONTA', 'DIGITO', 'RAZAO', 'NOME', 'NUM_DOCUMENTOS', 'NUM_PAGINAS', 'CURR_PAGE', 'CURR_LINE', 'STATUS', 'HOST', 'PROCESSO', 'CURR_DOC', 'GUID']
         
-        row_data = list(rows[-1])
+        row_data = list(rows[0])
         new_row = [row_data]
         df = pd.DataFrame(new_row, columns=columns)
 
