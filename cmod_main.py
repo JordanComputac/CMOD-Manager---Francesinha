@@ -19,27 +19,31 @@ data_man = DataManager()
 while True:
     
     if not data_man.get_data_one(0) == None:
-        date1, date2, ag, cc, task_path, list_of_subdir = data_man.get_data_one(0)
-
-        for i in range(len(list_of_subdir)):
+        date1, date2, ag, cc, task_path, list_of_subdir_original, list_of_subdir = data_man.get_data_one(0)
+        
+        for i in range(len(list_of_subdir_original)):
+            
+            for directory in list_of_subdir:
+                if directory.endswith("Controle"):
+                    choosen = directory
+            
             
             try:
-                download_dir = list_of_subdir[i]
-
+                #download_dir = list_of_subdir[i]
+                download_dir = choosen                
+                
                 ch_driver = ChromeDriverMan(download_dir)
 
                 driver = ch_driver.get_driver()
                 ch_driver.get_page()
                 ch_driver.login()
                 task_path, list_of_dir = ch_driver.fill_information_cmod(i)
-
-                for ieacht in list_of_dir:
-                    if ieacht == '\\\\192.168.24.17\\Carga\\Bradesco\\CPI\\LANBACEM-TI\\DOCUMENTOS FRANCESINHA\\TASK0584550\\Controle':
-                        ch_driver.rename_n_save(ieacht)            
-                    else:
-                        print("O caminho para o diretorio de controle pode estar corrompido")
-                        logging.warning("O caminho para o diretorio de controle pode estar corrompido")
-                        pass
+                
+                if task_path == False:
+                    print("Algo errado nao está certo no preenchimento das informacoes no acesso ao portal CMOD")
+                    break
+                
+                ch_driver.rename_n_save(download_dir)
                     
                 #ch_driver.get_item_list(list_of_dir[0])
                 ch_driver.add_card()
@@ -47,7 +51,12 @@ while True:
                 print("Há alguma interferência, demora de carregamento ou novo elemento no processo, verificar! ")
                 logging.warning("Há alguma interferência, demora de carregamento ou novo elemento no processo, verificar! ")
                 pass
+
+        if task_path == False:
+            print("erro no preenchimento de busca por 'Francesinha - sem nome'")
+            break
         print("hello, its'a me, Mario Karte! Acabou um loop de for")
+
     else:
         time.sleep(15)
         print("Não foi encontrado arquivo excel para ser processado por robô RPA Lanbacen - Francesinha do Bradesco CMOD")

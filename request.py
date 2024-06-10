@@ -59,6 +59,7 @@ class Connect:
             cursor.execute(f"SELECT * FROM {table}")
             rows = cursor.fetchall()
             print(f"Total number of rows in {table}: {len(rows)}")
+            
             for row in rows:
                 print(row)
         

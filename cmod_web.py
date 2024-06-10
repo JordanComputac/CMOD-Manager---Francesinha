@@ -136,7 +136,7 @@ class ChromeDriverMan:
         
         time.sleep(4)
         #the number 0 passed to func represents the first line of the excel file (first task)
-        date1, date2, ag, cc, task_path, list_of_subdir = self.data_man.get_data_one(row)
+        date1, date2, ag, cc, task_path, list_of_subdir_original, list_of_subdir  = self.data_man.get_data_one(row)
         
         try:
             list_block = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@data-dojo-attach-point='featureList']")))
@@ -147,7 +147,9 @@ class ChromeDriverMan:
 
             search_field = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//input[@id='ecm_widget_search_SearchSelector_0_filterTextBox']")))
             search_field.click()
+            search_field.clear()
             search_field.send_keys('79166 - Francesinha - Sem Nosso Número')
+            time.sleep(2)
             
 
         except:
@@ -161,29 +163,32 @@ class ChromeDriverMan:
                         
             time.sleep(3)
             open_dropdown_recent = self.driver.find_elements(By.XPATH, "(//*[@class='dijitInline dijitTreeExpando dijitTreeExpandoClosed'])")
-            try:
+            
+            try:                
                 open_dropdown_recent = open_dropdown_recent[0]
                 open_dropdown_recent.click()
             except:
-                print("Problema ao buscar elemento de clique 79166 - Francecinha sem numero")
-                logging.error("Problema ao buscar elemento de clique 79166 - Francecinha sem numero")
+                print("Tentando proxima tentativa de abrir dropdown menu pois já encontra-se aberto ao buscar elemento de clique 79166 - Francesinha sem numero")
+                logging.error("Tentando proxima tentativa de abrir dropdown menu pois já encontra-se aberto ao buscar elemento de clique 79166 - Francesinha sem numero")
             
             open_dropdown_all = self.driver.find_elements(By.XPATH, "(//*[@class='dijitInline dijitTreeExpando dijitTreeExpandoClosed'])")
             try:
-                open_dropdown_all = open_dropdown_all[1]
+                open_dropdown_all = open_dropdown_all[0]
                 open_dropdown_all.click()
+
             except:
-                print("Problema ao buscar elemento de clique 79166 - Francecinha sem numero")
-                logging.error("Problema ao buscar elemento de clique 79166 - Francecinha sem numero")
+                print("Tentando proxima tentativa de abrir dropdown menu pois já encontra-se aberto ao buscar elemento de clique 79166 - Francesinha sem numero")
+                logging.error("Tentando proxima tentativa de abrir dropdown menu pois já encontra-se aberto ao buscar elemento de clique 79166 - Francesinha sem numero")
             
-            driver.execute_script("document.evaluate(\"//*[contains(text(), '79166')]\", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();")
-
-            '''select_cat = self.driver.find_elements(By.XPATH, "(//*[contains(text(), '79166')])")
-            select_cat = select_cat[0]
-            select_cat.click()
-
-            sellect_par = select_cat.find_element(By.XPATH, '..')
-            sellect_par.click()'''
+            #driver.execute_script("document.evaluate(\"//*[contains(text(), '79166')]\", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();")
+            try:
+                clicables = self.driver.find_elements(By.XPATH, "(//*[contains(text(), '79166 - Francesinha - Sem Nosso Número')])")
+                clicables[-1].click()
+            except:
+                print("Nao foi possivel selecionar Francesinha - sem numero no inicio do processo")
+                logging.error("Nao foi possivel selecionar Francesinha - sem numero no inicio do processo")
+                return False, False
+           
 
         except:
             print("A procura do parametro '79166 - Francesinha' sofreu uma interrupção, verificar existência deste componente na página")
@@ -216,8 +221,11 @@ class ChromeDriverMan:
             
             ag_field = self.driver.find_elements(By.XPATH, "//input[@title='Conta']" )
             select_ag_field = ag_field[0]
-            select_ag_field.send_keys(new_cc)            
+            time.sleep(2)
+            select_ag_field.send_keys(new_cc)  
+        
             
+            time.sleep(2)
             btn_search = driver.find_element(By.XPATH, "//span[@widgetid='dijit_form_Button_2']")
             btn_search.click()
             time.sleep(3)
@@ -616,7 +624,7 @@ class ChromeDriverMan:
         #O trecho abaixo verifica a existencia do arquivo de controle em excel e cria um, caso não exista
         if os.path.isfile(name_file):
             values = self.data_man.get_item_list(itens_path, 'controle')
-             
+            
             print("O arquivo de controle ja existe")
             if values != None and values != '':
                 try:
@@ -761,40 +769,34 @@ class ChromeDriverMan:
     def add_card(self):
         
         self.organize_by_date()
-        
-        for i in range(200):
+        countng = 0
+        jujuba = True
 
-            wanted_element = self.selecting_element(i)  
+
+        for i in range(200):
+            
+            print(f"Elemento de número {i} processado!")
+            
+            
+            wanted_element = self.selecting_element(i)
+            
             self.driver.execute_script("arguments[0].scrollIntoView(true);", wanted_element)
             wanted_element.click()
             time.sleep(5)
+            
 
-            try:       
+            try:
                 
                 time.sleep(5)
-                actions = ActionChains(self.driver)      
-                #organize_files_box = WebDriverWait(self.drive
-                # r, 30).until(EC.presence_of_element_located((By.XPATH, "//span[contains(@class, 'dijitReset dijitInline dijitButtonNode') and @data-dojo-attach-event='ondijitclick:__onClick']")))
+                actions = ActionChains(self.driver)                
                 organize_files_box = WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.XPATH, "//span[@id = 'ADDTOSUNRISECARTACTION_dijit_form_Button_0']")))
                 organize_files_box.click()
                 
                 time.sleep(10)
                 
+
                 if i == 0:
                     time.sleep(5)
-                
-                '''if i == 1:
-                    try:
-                        tras = self.driver.find_element(By. XPATH, "//span[@class='align-right ui-icon ui-icon-trash']")
-                        tras.click()
-                        self.driver.execute_script("arguments[0].click();", btn_tras)
-
-                    except:
-                        print("A funcao funcionou normalmente sem interrupcoes")'''
-                #script = "document.getElementById('ecm_widget_Button_41').click()"
-                #self.driver.execute_script(script)]
-
-                if i == 0:
                     btn_preview = self.driver.find_element(By.XPATH, "(//span[contains(text(), 'Preview')])")
                     btn_tras = self.driver.find_element(By.XPATH, "(//span[contains(text(), 'Close')])//parent::span[1]")
                     
@@ -818,36 +820,37 @@ class ChromeDriverMan:
 
                 except:
                     print("A funcao funcionou normalmente sem interrupcoes")
+            
+                if i >= 199:
+                    
+                    try:
+                        jujuba = self.list_foward(99999999999)
+                        
+                    except:
+                        print(f"Esta é a última rodada do loop na última lista de itens disponíveis, com {countng} elementos processados")
+                        logging.info(f"Esta e a ultima rodada do loop na ultima lista de itens disponiveis, com {countng} elementos processados")
+                                            
+                        continue
+                    
+                    print(f"Processados 200 elementos - limite total da pagina -> Elemento {wanted_element}")
+                    logging.info(f"Processados 200 elementos - limite total da pagina -> Elemento {wanted_element}")
+                                        
 
-                                                         
-                '''btn_preview = self.driver.find_element(By.XPATH, "//span[contains(text(), 'Preview')]")
-                parent_span = btn_preview.find_element(By.XPATH, "./parent::span")
+                else: 
+                    print(f"{countng} elementos processados")
 
-
-
-                bar_element_preview = self.driver.find_elements(By.XPATH, "(//div[@class='dijitDialogPaneActionBar ecmDialogPaneActionBar']")
-                bar_element = bar_element_preview[-2]
-                button_bars = bar_element.find_element(By.XPATH, "(//span)")
-                button_bar = button_bars[7]
-
-
-                #Elemnteare de java script
-                self.driver.execute_script("arguments[0].click();", button_bar)
-
-                preview_elements = self.driver.find_elements(By.XPATH, "(//span[@class = 'dijit dijitReset dijitInline idxButtonDerived dijitButton'])")
-                preview = preview_elements[-1]
-                actions.move_to_element(preview).perform()
-                preview.click()
-                
-                time.sleep(4)'''
-                
-                
-
+                    if jujuba == False:
+                        print(f"Esta é a última rodada do loop na última lista de itens disponíveis, terminando processo com {countng} elementos processados")
+                        logging.info(f"Esta e a ultima rodada do loop na ultima lista de itens disponiveis, terminando processo com {countng} elementos processados")
+                        break
+            
             except Exception as e:
                 print("Elemento nao encontrado, verificar a existencia e posicao de identificador:", e)
                 logging.error("Elemento nao encontrado, verificar a existencia e posicao de identificador:")
 
-    
+            countng = countng+1
+
+
     def rename_n_save(self, file_path_outros):
 
         name_file = file_path_outros+'\\'+'controle.xlsx'
@@ -859,69 +862,97 @@ class ChromeDriverMan:
         else:            
             self.data_man.create_file(name_file, 'controle')
         
-        pdf_files = self.data_man.pdf_quantity(file_path_outros)
-        
+        pdf_files = self.data_man.pdf_quantity(file_path_outros)        
 
         pattern2 = r'^\d{2}\.\d{2}\.\d{4}\.pdf$'       
         pattern3 = r'^\d{2}\.\d{2}\.\d{4} \d+\.pdf$'
         old_file_handle = [file for file in pdf_files if re.match(pattern2, file) or re.match(pattern3, file)]
         
-        if old_file_handle:
+        if len(old_file_handle) > 0:
             
             for i in range(len(old_file_handle)):
-
+                cl_info_dict = []
+                indices = []
+                status = True
+                
                 pdf_file = os.path.join(file_path_outros, old_file_handle[i])
                 df = self.data_man.extract_text_from_pdf(pdf_file)
                 cl_info_dict, indices, status = self.data_man.get_linhas_cl(df, file_path_outros)
+
                 dir = os.path.dirname(file_path_outros)
                 old_dir = pdf_file
                 #new_plus = os.path.basename(file_path_outros)
-
-                if 2 in indices:
+                
+                if ('2' in indices) or (2 in indices):
                     new_dir = dir + f'\\CL - 2\\{old_file_handle[i]}'
                 else:
                     new_dir = dir + f'\\CL - OUTROS\\{old_file_handle[i]}'
                 time.sleep(1)
                 self.data_man.send_file(old_dir,new_dir)
 
+            '''elif status == "Não foi encontrado o padrão regex para este documento":
+            formatted_date = self.rename_it(pdf_file, "padrao nao reconhecido")
+            print("O padrao nao foi reconhecido no regex old_file") 
+            logging.error("O padrao nao foi reconhecido no regex old_file")'''
+
+
+        else:            
+            print("A lista com pdfs já renomeados está vazia")
+
         new_file_handle = [file for file in pdf_files if not re.match(pattern2, file) and not re.match(pattern3, file)]
-  
-        if new_file_handle:
+        
+        if len(new_file_handle)>0:
             for i in range(len(new_file_handle)):
                 
-                
+                cl_info_dict = []
+                indices = []
+                status = True
+
                 pdf_file = os.path.join(file_path_outros, new_file_handle[i])
                 #text = self.data_man.read_pdf(pdf_file)
                 df = self.data_man.extract_text_from_pdf(pdf_file)
-                date_emissao = self.data_man.get_date_from_df(df)
+                data_emissao = self.data_man.get_date_from_df(df)
+                #monetary_value = 
+                
                 cl_info_dict, indices, status = self.data_man.get_linhas_cl(df, file_path_outros)
                 
-
+                
                 if status == False:
                     
-                    formatted_date = self.rename_it(pdf_file, date_emissao)
-                    
+                    formatted_date = self.rename_it(pdf_file, data_emissao)                    
                     time.sleep(1)
+
+
                     if formatted_date:
 
                         dir = os.path.dirname(file_path_outros)
                         old_dir = formatted_date
                         new_plus = os.path.basename(formatted_date)
-
-                        if 2 in indices:
+                        
+                        if ('2' in indices) or (2 in indices):
                             new_dir = dir + f'\\CL - 2\\{new_plus}'
                         else:
                             new_dir = dir + f'\\CL - OUTROS\\{new_plus}'
                         time.sleep(1)
+                        
                         self.data_man.send_file(old_dir,new_dir)
                     else:
                         print("Nao foi possivel fazer mudanca de diretorio")
-                else:
-                    os.remove(pdf_file)
-                    print(f"O arquivo {pdf_file} já foi renomeado e inserido no devido diretorio de destino, excluindo arquivo...")
 
+                elif status == "Não foi encontrado o padrão regex para este documento":
+                    formatted_date = self.rename_it(pdf_file, "padrao nao reconhecido")
+                    print("O padrao nao foi reconhecido no regex")
+                    logging.error("O padrao nao foi reconhecido no regex")
+
+                elif status == True:
+                    os.remove(pdf_file)
+                    #date = "N00/N0/N0/N00"
+                    #formatted_date = self.rename_it(pdf_file, date)
+                    print(f"O arquivo {pdf_file} já foi renomeado e inserido no devido diretorio de destino, excluindo arquivo...")
+                else:
+                    print("alguma diferenca do estado antigo para atual")
         else:
-            print("The list is empty.")
+            print("A lista com pdfs não renomeados está vazia")
         
         return print("itens renomeados e movidos com sucesso")
     
