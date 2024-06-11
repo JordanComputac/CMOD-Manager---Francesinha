@@ -495,11 +495,10 @@ class DataManager:
     def get_linhas_cl(self, df, file_path_outros):
         
         file_name = file_path_outros+'\\controle.xlsx'
-        #pattern = r'\d{2}/\d{2}/\d{3}\.\d{3}\.\d{3}'
-        #pattern = r'\d{2}/\d{2,5}/(\d{3}\.\d{3}\.\d{3}|\d+)'
-        #pattern = r'(\d{2}/\d{2}/\d{3}\.\d{3}\.\d{3})\s+(\d+)\s+([\w\s&]+?)\s+(\d{2}/\d{2}/\d{4})\s+(\d{2}/\d{2}/\d{4})\s+(\d+)'
+        
         pattern = r'(\d{2}/\d{2}/\d{3}\.\d{3}\.\d{3})\s+(\d+/\d+|\d+)\s+([\w\s&]+?)\s+(\d{2}/\d{2}/\d{4})\s+([\d,]+)'
-        #pattern = r"(\d{2}/\d{2}/\d{3}\.\d{3})\s+(\d+)\s+([A-Z\s]+)\s+(\d{2}/\d{2}/\d{4})\s+(\d{2},\d{2})"
+        #pattern = r'(\d{2}/\d{2}/\d{3}\.\d{3}\.\d{3})\s+(\d+/\d+|\d+)\s+([\w\s&.]+?)\s+(\d{2}/\d{2}/\d{4})\s+(\d{2}/\d{2}/\d{4})\s+([\d,.]+)\s+([\d,.]+[+])?\s+([\d,.]+)\s+(\d+)'
+
         indices = []
         gen_infos = []
         cl_numbers = []
@@ -509,22 +508,21 @@ class DataManager:
         for index, row in df.iterrows():            
             
             for col in df.columns:
+                #colls = [colls for colls in df.columns if re.search(pattern, str(row[col]))]
                 
-                if re.search(pattern, str(row[col])):                                       
+                if re.search(pattern, str(row[col])):                              
                     time.sleep(1)
-                    indices.append(index)              
+                    indices.append(index)             
                     first_string = df.iloc[index,0]
                     colls.append(first_string)
-                    print(f"Dados identificados e encontrado {first_string}")
+                    print(f"Deu match! Dados identificados e encontrado {first_string}")
                     
-                    '''elif len(colls) == 0:
-                    print("Regex nao está identificando os dados do pdf")
-                    logging.error("Regex nao esta identificando os dados do pdf")
-                    return [],[], "Não foi encontrado o padrão regex para este documento"'''
                 else:
+                    print("Não deu match no padrão por enquanto")
                     #return [],[], "alguma diferenca do estado antigo para atual"
                     pass
-                    
+            
+        
         if len(colls)>0:
             for i in range(len(colls)):
                 
@@ -569,6 +567,7 @@ class DataManager:
                         print("A definicao do elemento CL esta com problemas")
                         logging.warning("A definicao do elemento CL esta com problemas")
                     
+                    
                     cl_numbers.append(cl_number)     
                     info_pack1 = {'gen_infos': f'{first_string}', 'cl_number': f'{cl_number}'}
                     
@@ -593,23 +592,9 @@ class DataManager:
                     if cleaned[-1] == '.':
                         cl_number = cleaned[-2]
                     else:
-                        cl_number = cleaned[-1]
-                        '''try:
-                            print("Tentativa de abordagem diferente para obtencao do CL pois  apresenta formatacao diferente")
-                            logging.warning("Tentativa de abordagem diferente para obtencao do CL pois  apresenta formatacao diferente")
-                            print(f'gen_info = {colls[i]}, e suposto CL = {cl_number}')
-                            logging.warning(f'gen_info = {colls[i]}, e suposto CL = {cl_number}')
-                            dirty_string = df.iloc[indices[i], 1]
-                            cleaned_string = ' '.join(dirty_string.split())
-                            cleaned = cleaned_string.split()
-                            cl_number = cleaned[-1]
-                            print(f'Novo gen_info = {colls[i]}, e suposto CL = {cl_number}')
-                            logging.warning(f'Novo gen_info = {colls[i]}, e suposto CL = {cl_number}')
-                        except:
-                            print("A definicao do elemento CL esta com problemas")
-                            logging.warning("A definicao do elemento CL esta com problemas")'''
-                        
+                        cl_number = cleaned[-1]                    
 
+                    
                     cl_numbers.append(cl_number)     
                     info_pack1 = {'gen_infos': f'{first_string}', 'cl_number': f'{cl_number}'}
                     
@@ -630,10 +615,11 @@ class DataManager:
                         return [],[], True
 
                 time.sleep(1)
-            else:
-                print("Todas as colunas analisadas nao retornaram padrao de reconhecimento do regex")
-                logging.warning("Todas as colunas analisadas nao retornaram padrao de reconhecimento do regex")
-                
+        else:
+            
+            print("Todas as colunas analisadas nao retornaram padrao de reconhecimento do regex")
+            logging.warning("Todas as colunas analisadas nao retornaram padrao de reconhecimento do regex")
+            return [],[], "Não foi encontrado o padrão regex para este documento"
         
         return info_pack1, cl_numbers, status
     

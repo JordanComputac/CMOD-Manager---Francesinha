@@ -673,7 +673,7 @@ class ChromeDriverMan:
             all_files = os.listdir(network_directory)
             
             lin_files = [file for file in all_files if file.endswith('.lin')]                
-            txt_files = [file for file in all_files if file.endswith('.txt')] 
+            txt_files = [file for file in all_files if file.endswith('.txt')]
             tmp_files = [file for file in all_files if file.endswith('.tmp')]
                             
             #VERIFICACAO 1 - A quantidade de arquivos '.lin'+'.txt' encontrada deve ser igual a quantidade encontrada no arquivo controle
@@ -723,10 +723,7 @@ class ChromeDriverMan:
                 wanted_elements = self.driver.find_elements(By.XPATH, "//table[@class = 'gridxRowTable']//child::td[@aria-describedby='gridx_Grid_2-6']")
 
                 wanted_element = str(wanted_element).zfill(13)
-                #self.search_element(wanted_element)   
-                #self.move_foward()              
-                #self.download_files(wanted_element)
-                
+                                
                 print("vindo do controle cheio")
                 self.loop_manager(txt_files)
             else:
@@ -766,90 +763,112 @@ class ChromeDriverMan:
         return wanted_element
         
     
-    def add_card(self):
-        
+    def add_card(self, qntty):
+        breakpoint()
         self.organize_by_date()
         countng = 0
         jujuba = True
+        
+        jump_qntty = qntty/200
+        if jump_qntty < 1:
+            jumpy = 0
+        else:
+            jumpy = int(jump_qntty)
+            for iuyt in range(jumpy):
+                jujuba = self.list_foward(99999999999)
+                print(f"volta de inicio de número {iuyt} para setar página de seleção dos downloads")
 
+        while True:
 
-        for i in range(200):
-            
-            print(f"Elemento de número {i} processado!")
-            
-            
-            wanted_element = self.selecting_element(i)
-            
-            self.driver.execute_script("arguments[0].scrollIntoView(true);", wanted_element)
-            wanted_element.click()
-            time.sleep(5)
-            
-
-            try:
+            for i in range(200):
                 
-                time.sleep(5)
-                actions = ActionChains(self.driver)                
-                organize_files_box = WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.XPATH, "//span[@id = 'ADDTOSUNRISECARTACTION_dijit_form_Button_0']")))
-                organize_files_box.click()
+                print(f"Elemento de número {i} processado!")
                 
-                time.sleep(10)
                 
-
-                if i == 0:
-                    time.sleep(5)
-                    btn_preview = self.driver.find_element(By.XPATH, "(//span[contains(text(), 'Preview')])")
-                    btn_tras = self.driver.find_element(By.XPATH, "(//span[contains(text(), 'Close')])//parent::span[1]")
-                    
-                else:
-                    btn_preview = self.driver.find_element(By.XPATH, "(//span[contains(text(), 'Preview')])[2]")
-                    btn_tras = self.driver.find_element(By.XPATH,f"(//span[contains(text(), 'Close')])[{i+1}]//parent::span[1]")
-                 
-                time.sleep(5)
-                parent_span = btn_preview.find_element(By.XPATH, "(./parent::span)[1]")
-                self.driver.execute_script("arguments[0].click();", parent_span)
+                wanted_element = self.selecting_element(i)
+                
+                self.driver.execute_script("arguments[0].scrollIntoView(true);", wanted_element)
+                wanted_element.click()
                 time.sleep(5)
                 
-                #actions.move_to_element(parent_span).perform()
-                
+
                 try:
                     
-                    tras = self.driver.find_element(By. XPATH, "//span[@class='align-right ui-icon ui-icon-trash']")
-                    tras.click()
-                    time.sleep(1)
-                    self.driver.execute_script("arguments[0].click();", btn_tras)
+                    time.sleep(5)
+                    actions = ActionChains(self.driver)                
+                    organize_files_box = WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.XPATH, "//span[@id = 'ADDTOSUNRISECARTACTION_dijit_form_Button_0']")))
+                    organize_files_box.click()
+                    
+                    time.sleep(10)
+                    
 
-                except:
-                    print("A funcao funcionou normalmente sem interrupcoes")
-            
-                if i >= 199:
+                    if i == 0:
+                        time.sleep(5)
+                        btn_preview = self.driver.find_element(By.XPATH, "(//span[contains(text(), 'Preview')])")
+                        btn_tras = self.driver.find_element(By.XPATH, "(//span[contains(text(), 'Close')])//parent::span[1]")
+                        
+                    else:
+                        btn_preview = self.driver.find_element(By.XPATH, "(//span[contains(text(), 'Preview')])[2]")
+                        btn_tras = self.driver.find_element(By.XPATH,f"(//span[contains(text(), 'Close')])[{i+1}]//parent::span[1]")
+                    
+                    time.sleep(5)
+                    parent_span = btn_preview.find_element(By.XPATH, "(./parent::span)[1]")
+                    self.driver.execute_script("arguments[0].click();", parent_span)
+                    time.sleep(5)
+                    
+                    #actions.move_to_element(parent_span).perform()
                     
                     try:
-                        jujuba = self.list_foward(99999999999)
                         
+                        tras = self.driver.find_element(By. XPATH, "//span[@class='align-right ui-icon ui-icon-trash']")
+                        tras.click()
+                        time.sleep(1)
+                        self.driver.execute_script("arguments[0].click();", btn_tras)
+
                     except:
-                        print(f"Esta é a última rodada do loop na última lista de itens disponíveis, com {countng} elementos processados")
-                        logging.info(f"Esta e a ultima rodada do loop na ultima lista de itens disponiveis, com {countng} elementos processados")
+                        print("A funcao funcionou normalmente sem interrupcoes")
+                
+                    if i >= 199:
+                        
+                        try:
+                            jujuba = self.list_foward(99999999999)
+                            
+                        except:
+                            print(f"Esta é a última rodada do loop na última lista de itens disponíveis, com {countng} elementos processados")
+                            logging.info(f"Esta e a ultima rodada do loop na ultima lista de itens disponiveis, com {countng} elementos processados")
+                                                
+                            continue
+                        
+                        print(f"Processados 200 elementos - limite total da pagina -> Elemento {wanted_element}")
+                        logging.info(f"Processados 200 elementos - limite total da pagina -> Elemento {wanted_element}")
                                             
-                        continue
-                    
-                    print(f"Processados 200 elementos - limite total da pagina -> Elemento {wanted_element}")
-                    logging.info(f"Processados 200 elementos - limite total da pagina -> Elemento {wanted_element}")
-                                        
 
-                else: 
-                    print(f"{countng} elementos processados")
+                    else: 
+                        print(f"{countng} elementos processados")
 
-                    if jujuba == False:
-                        print(f"Esta é a última rodada do loop na última lista de itens disponíveis, terminando processo com {countng} elementos processados")
-                        logging.info(f"Esta e a ultima rodada do loop na ultima lista de itens disponiveis, terminando processo com {countng} elementos processados")
-                        break
-            
-            except Exception as e:
-                print("Elemento nao encontrado, verificar a existencia e posicao de identificador:", e)
-                logging.error("Elemento nao encontrado, verificar a existencia e posicao de identificador:")
+                        if jujuba == False:
+                            print(f"Esta é a última rodada do loop na última lista de itens disponíveis, terminando processo com {countng} elementos processados")
+                            logging.info(f"Esta e a ultima rodada do loop na ultima lista de itens disponiveis, terminando processo com {countng} elementos processados")
+                            break
+                
+                except Exception as e:
+                    print("Elemento nao encontrado, verificar a existencia e posicao de identificador:", e)
+                    logging.error("Elemento nao encontrado, verificar a existencia e posicao de identificador:")
 
-            countng = countng+1
+                countng = countng+1
 
+
+    def count_pdf_files(self, dir_path1, dir_path2):
+
+        
+        all_files1 = os.listdir(dir_path1)
+        pdf_files1 = [file for file in all_files1 if file.endswith('.pdf')]
+
+        all_files2 = os.listdir(dir_path2)
+        pdf_files2 = [file for file in all_files2 if file.endswith('.pdf')]
+        total = len(pdf_files1)+len(pdf_files2)
+        return total
+        
 
     def rename_n_save(self, file_path_outros):
 
@@ -878,22 +897,21 @@ class ChromeDriverMan:
                 pdf_file = os.path.join(file_path_outros, old_file_handle[i])
                 df = self.data_man.extract_text_from_pdf(pdf_file)
                 cl_info_dict, indices, status = self.data_man.get_linhas_cl(df, file_path_outros)
-
+                
                 dir = os.path.dirname(file_path_outros)
                 old_dir = pdf_file
                 #new_plus = os.path.basename(file_path_outros)
+                dir_cl2 = dir + f'\\CL - 2\\{new_plus}'
+                dir_cl_outros = dir + f'\\CL - OUTROS\\{new_plus}'
+                
+                
                 
                 if ('2' in indices) or (2 in indices):
-                    new_dir = dir + f'\\CL - 2\\{old_file_handle[i]}'
+                    new_dir = dir_cl2
                 else:
-                    new_dir = dir + f'\\CL - OUTROS\\{old_file_handle[i]}'
+                    new_dir = dir_cl_outros
                 time.sleep(1)
                 self.data_man.send_file(old_dir,new_dir)
-
-            '''elif status == "Não foi encontrado o padrão regex para este documento":
-            formatted_date = self.rename_it(pdf_file, "padrao nao reconhecido")
-            print("O padrao nao foi reconhecido no regex old_file") 
-            logging.error("O padrao nao foi reconhecido no regex old_file")'''
 
 
         else:            
@@ -912,8 +930,7 @@ class ChromeDriverMan:
                 #text = self.data_man.read_pdf(pdf_file)
                 df = self.data_man.extract_text_from_pdf(pdf_file)
                 data_emissao = self.data_man.get_date_from_df(df)
-                #monetary_value = 
-                
+                                
                 cl_info_dict, indices, status = self.data_man.get_linhas_cl(df, file_path_outros)
                 
                 
@@ -928,11 +945,14 @@ class ChromeDriverMan:
                         dir = os.path.dirname(file_path_outros)
                         old_dir = formatted_date
                         new_plus = os.path.basename(formatted_date)
+                        dir_cl2 = dir + f'\\CL - 2\\{new_plus}'
+                        dir_cl_outros = dir + f'\\CL - OUTROS\\{new_plus}'
                         
+
                         if ('2' in indices) or (2 in indices):
-                            new_dir = dir + f'\\CL - 2\\{new_plus}'
+                            new_dir = dir_cl2
                         else:
-                            new_dir = dir + f'\\CL - OUTROS\\{new_plus}'
+                            new_dir = dir_cl_outros
                         time.sleep(1)
                         
                         self.data_man.send_file(old_dir,new_dir)
@@ -940,9 +960,11 @@ class ChromeDriverMan:
                         print("Nao foi possivel fazer mudanca de diretorio")
 
                 elif status == "Não foi encontrado o padrão regex para este documento":
+                    
                     formatted_date = self.rename_it(pdf_file, "padrao nao reconhecido")
                     print("O padrao nao foi reconhecido no regex")
                     logging.error("O padrao nao foi reconhecido no regex")
+                    time.sleep(2)                   
 
                 elif status == True:
                     os.remove(pdf_file)
@@ -953,8 +975,14 @@ class ChromeDriverMan:
                     print("alguma diferenca do estado antigo para atual")
         else:
             print("A lista com pdfs não renomeados está vazia")
-        
-        return print("itens renomeados e movidos com sucesso")
+        print("itens renomeados e movidos com sucesso")
+
+        dir = os.path.dirname(file_path_outros)                    
+        dir_cl2 = dir + f'\\CL - 2'
+        dir_cl_outros = dir + f'\\CL - OUTROS'
+        jump_qntty = self.count_pdf_files(dir_cl2, dir_cl_outros)
+
+        return jump_qntty
     
 
             

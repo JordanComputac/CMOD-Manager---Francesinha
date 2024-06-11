@@ -43,10 +43,10 @@ while True:
                     print("Algo errado nao está certo no preenchimento das informacoes no acesso ao portal CMOD")
                     break
                 
-                ch_driver.rename_n_save(download_dir)
+                jump_qntty = ch_driver.rename_n_save(download_dir)
                     
                 #ch_driver.get_item_list(list_of_dir[0])
-                ch_driver.add_card()
+                ch_driver.add_card(jump_qntty)
             except:
                 print("Há alguma interferência, demora de carregamento ou novo elemento no processo, verificar! ")
                 logging.warning("Há alguma interferência, demora de carregamento ou novo elemento no processo, verificar! ")
