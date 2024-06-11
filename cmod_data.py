@@ -490,7 +490,7 @@ class DataManager:
             print("Atualizacao de dados de controle .xlsx nao ocorreu conforme planejado, há algum impeditivo")
             logging.warning("Atualizacao de dados de controle .xlsx nao ocorreu conforme planejado, ha algum impeditivo")
             
-        
+
             
     def get_linhas_cl(self, df, file_path_outros):
         
@@ -517,118 +517,123 @@ class DataManager:
                     colls.append(first_string)
                     print(f"Dados identificados e encontrado {first_string}")
                     
-                elif len(colls) == 0:
+                    '''elif len(colls) == 0:
                     print("Regex nao está identificando os dados do pdf")
                     logging.error("Regex nao esta identificando os dados do pdf")
-                    return [],[], "Não foi encontrado o padrão regex para este documento"
+                    return [],[], "Não foi encontrado o padrão regex para este documento"'''
                 else:
-                    return [],[], "alguma diferenca do estado antigo para atual"
+                    #return [],[], "alguma diferenca do estado antigo para atual"
+                    pass
                     
-        
-        for i in range(len(colls)):
-            
-            last_nosso_numero = colls[-1].split()
-            last_nosso_numero = last_nosso_numero[0]
-            
-            splitie =  colls[i].split()
-            nosso_numero = splitie[0]
-            first_string = colls[i] 
-            gen_infos.append(first_string)            
-            
-            if nosso_numero != str(colls[i]).split()[0]:
-                print(f"Codigo regex {str(row[col])[0]} diferente do valor encontrado em 'Nosso Numero' {str(nosso_numero)} ")
-            elif len(indices) != len(colls):
-                print("O numero de registros de indices é diferente dos valores encontrados de nosso número na lista de CLs")
-            elif first_string not in gen_infos:
-                gen_infos.append(first_string)
-            
-                        
-            dirty_string = df.iloc[indices[i], -3]
-            cleaned_string = ' '.join(dirty_string.split())
-            cleaned = cleaned_string.split()
+        if len(colls)>0:
+            for i in range(len(colls)):
+                
+                last_nosso_numero = colls[-1].split()
+                last_nosso_numero = last_nosso_numero[0]
+                
+                splitie =  colls[i].split()
+                nosso_numero = splitie[0]
+                first_string = colls[i] 
+                gen_infos.append(first_string)            
+                
+                if nosso_numero != str(colls[i]).split()[0]:
+                    print(f"Codigo regex {str(row[col])[0]} diferente do valor encontrado em 'Nosso Numero' {str(nosso_numero)} ")
+                elif len(indices) != len(colls):
+                    print("O numero de registros de indices é diferente dos valores encontrados de nosso número na lista de CLs")
+                elif first_string not in gen_infos:
+                    gen_infos.append(first_string)
+                
+                            
+                dirty_string = df.iloc[indices[i], -3]
+                cleaned_string = ' '.join(dirty_string.split())
+                cleaned = cleaned_string.split()
 
-            
-            
-            if len(cleaned)==0:
-                print("CL number is a little fcd :) ")
-                logging.warning("CL number is a little fcd :) ")
-                try:
-                    dirty_string = df.iloc[indices[i], 1]
-                    cleaned_string = ' '.join(dirty_string.split())
-                    cleaned = cleaned_string.split()
-                    cl_number = cleaned[-1]
-                    print("Tentativa de abordagem diferente para obtencao do CL pois  apresenta formatacao diferente")
-                    logging.warning("Tentativa de abordagem diferente para obtencao do CL pois  apresenta formatacao diferente")
-                    print(f'gen_info = {colls[i]}, e suposto CL = {cl_number}')
-                    logging.warning(f'gen_info = {colls[i]}, e suposto CL = {cl_number}')
-                    
-                    print(f'Novo gen_info = {colls[i]}, e suposto CL = {cl_number}')
-                    logging.warning(f'Novo gen_info = {colls[i]}, e suposto CL = {cl_number}')
-                except:
-                    print("A definicao do elemento CL esta com problemas")
-                    logging.warning("A definicao do elemento CL esta com problemas")
                 
-                cl_numbers.append(cl_number)     
-                info_pack1 = {'gen_infos': f'{first_string}', 'cl_number': f'{cl_number}'}
                 
-                status = self.verify_item_existence(file_name, 'controle', f'{first_string}')
-                
-                #False means "do not exist" ---then--> update/insert in the file
-                if status == False:
-                    self.update_excel_with_new_row(file_name, info_pack1)
-                    time.sleep(1)
-                    print(f"Realizando atualizacao da lista controle com elemento n°: {i}")
-                    if nosso_numero == last_nosso_numero:
-                        info_pack = {'gen_infos': 'Lista de CLs ---> ', 'cl_number': f'{cl_numbers}'}
-                        self.update_excel_with_new_row(file_name, info_pack)
-                        (f"Realizando atualizacao do elemento separador final da lista controle com elemento n°: {i}")
-                else:
-                    print(f"O elemento ja existe na lista de controle ---> volta de número: {i}")                        
-                    return [],[], True
-            else:   
-                print("CL number is not as fcd as before :) ")
-                logging.warning("CL number is not as fcd as before :) ")
-                
-                if cleaned[-1] == '.':
-                    cl_number = cleaned[-2]
-                else:
-                    cl_number = cleaned[-1]
-                    '''try:
-                        print("Tentativa de abordagem diferente para obtencao do CL pois  apresenta formatacao diferente")
-                        logging.warning("Tentativa de abordagem diferente para obtencao do CL pois  apresenta formatacao diferente")
-                        print(f'gen_info = {colls[i]}, e suposto CL = {cl_number}')
-                        logging.warning(f'gen_info = {colls[i]}, e suposto CL = {cl_number}')
+                if len(cleaned)==0:
+                    print("CL number is a little fcd :) ")
+                    logging.warning("CL number is a little fcd :) ")
+                    try:
                         dirty_string = df.iloc[indices[i], 1]
                         cleaned_string = ' '.join(dirty_string.split())
                         cleaned = cleaned_string.split()
                         cl_number = cleaned[-1]
+                        print("Tentativa de abordagem diferente para obtencao do CL pois  apresenta formatacao diferente")
+                        logging.warning("Tentativa de abordagem diferente para obtencao do CL pois  apresenta formatacao diferente")
+                        print(f'gen_info = {colls[i]}, e suposto CL = {cl_number}')
+                        logging.warning(f'gen_info = {colls[i]}, e suposto CL = {cl_number}')
+                        
                         print(f'Novo gen_info = {colls[i]}, e suposto CL = {cl_number}')
                         logging.warning(f'Novo gen_info = {colls[i]}, e suposto CL = {cl_number}')
                     except:
                         print("A definicao do elemento CL esta com problemas")
-                        logging.warning("A definicao do elemento CL esta com problemas")'''
+                        logging.warning("A definicao do elemento CL esta com problemas")
                     
+                    cl_numbers.append(cl_number)     
+                    info_pack1 = {'gen_infos': f'{first_string}', 'cl_number': f'{cl_number}'}
+                    
+                    status = self.verify_item_existence(file_name, 'controle', f'{first_string}')
+                    
+                    #False means "do not exist" ---then--> update/insert in the file
+                    if status == False:
+                        self.update_excel_with_new_row(file_name, info_pack1)
+                        time.sleep(1)
+                        print(f"Realizando atualizacao da lista controle com elemento n°: {i}")
+                        if nosso_numero == last_nosso_numero:
+                            info_pack = {'gen_infos': 'Lista de CLs ---> ', 'cl_number': f'{cl_numbers}'}
+                            self.update_excel_with_new_row(file_name, info_pack)
+                            (f"Realizando atualizacao do elemento separador final da lista controle com elemento n°: {i}")
+                    else:
+                        print(f"O elemento ja existe na lista de controle ---> volta de número: {i}")                        
+                        return [],[], True
+                else:   
+                    print("CL number is not as fcd as before :) ")
+                    logging.warning("CL number is not as fcd as before :) ")
+                    
+                    if cleaned[-1] == '.':
+                        cl_number = cleaned[-2]
+                    else:
+                        cl_number = cleaned[-1]
+                        '''try:
+                            print("Tentativa de abordagem diferente para obtencao do CL pois  apresenta formatacao diferente")
+                            logging.warning("Tentativa de abordagem diferente para obtencao do CL pois  apresenta formatacao diferente")
+                            print(f'gen_info = {colls[i]}, e suposto CL = {cl_number}')
+                            logging.warning(f'gen_info = {colls[i]}, e suposto CL = {cl_number}')
+                            dirty_string = df.iloc[indices[i], 1]
+                            cleaned_string = ' '.join(dirty_string.split())
+                            cleaned = cleaned_string.split()
+                            cl_number = cleaned[-1]
+                            print(f'Novo gen_info = {colls[i]}, e suposto CL = {cl_number}')
+                            logging.warning(f'Novo gen_info = {colls[i]}, e suposto CL = {cl_number}')
+                        except:
+                            print("A definicao do elemento CL esta com problemas")
+                            logging.warning("A definicao do elemento CL esta com problemas")'''
+                        
 
-                cl_numbers.append(cl_number)     
-                info_pack1 = {'gen_infos': f'{first_string}', 'cl_number': f'{cl_number}'}
+                    cl_numbers.append(cl_number)     
+                    info_pack1 = {'gen_infos': f'{first_string}', 'cl_number': f'{cl_number}'}
+                    
+                    status = self.verify_item_existence(file_name, 'controle', f'{first_string}')
+                    
+                    #False means "do not exist" ---then--> update/insert in the file
+                    if status == False:
+                        self.update_excel_with_new_row(file_name, info_pack1)
+                        time.sleep(1)
+                        print(f"Realizando atualizacao da lista controle com elemento n°: {i}")
+                        if nosso_numero == last_nosso_numero:
+                            info_pack = {'gen_infos': 'Lista de CLs ---> ', 'cl_number': f'{cl_numbers}'}
+                            self.update_excel_with_new_row(file_name, info_pack)
+                            (f"Realizando atualizacao do elemento separador final da lista controle com elemento n°: {i}")
+                    else:
+
+                        print(f"O elemento ja existe na lista de controle ---> volta de número: {i}")                        
+                        return [],[], True
+
+                time.sleep(1)
+            else:
+                print("Todas as colunas analisadas nao retornaram padrao de reconhecimento do regex")
+                logging.warning("Todas as colunas analisadas nao retornaram padrao de reconhecimento do regex")
                 
-                status = self.verify_item_existence(file_name, 'controle', f'{first_string}')
-                
-                #False means "do not exist" ---then--> update/insert in the file
-                if status == False:
-                    self.update_excel_with_new_row(file_name, info_pack1)
-                    time.sleep(1)
-                    print(f"Realizando atualizacao da lista controle com elemento n°: {i}")
-                    if nosso_numero == last_nosso_numero:
-                        info_pack = {'gen_infos': 'Lista de CLs ---> ', 'cl_number': f'{cl_numbers}'}
-                        self.update_excel_with_new_row(file_name, info_pack)
-                        (f"Realizando atualizacao do elemento separador final da lista controle com elemento n°: {i}")
-                else:
-
-                    print(f"O elemento ja existe na lista de controle ---> volta de número: {i}")                        
-                    return [],[], True
-
-            time.sleep(1)
         
         return info_pack1, cl_numbers, status
     
