@@ -859,7 +859,7 @@ class ChromeDriverMan:
                 countng = countng+1
 
 
-    def count_pdf_files(self, dir_path1, dir_path2):
+    def count_pdf_files(self, dir_path1, dir_path2, dir_path3):
 
         
         all_files1 = os.listdir(dir_path1)
@@ -867,7 +867,11 @@ class ChromeDriverMan:
 
         all_files2 = os.listdir(dir_path2)
         pdf_files2 = [file for file in all_files2 if file.endswith('.pdf')]
-        total = len(pdf_files1)+len(pdf_files2)
+
+        all_files3 = os.listdir(dir_path3)
+        pdf_files3 = [file for file in all_files3 if file.endswith('.pdf')]
+
+        total = len(pdf_files1)+len(pdf_files2)+len(pdf_files3)
         return total
         
 
@@ -981,7 +985,8 @@ class ChromeDriverMan:
         dir = os.path.dirname(file_path_outros)                    
         dir_cl2 = dir + f'\\CL - 2'
         dir_cl_outros = dir + f'\\CL - OUTROS'
-        jump_qntty = self.count_pdf_files(dir_cl2, dir_cl_outros)
+        dir_cl_controle = dir + f'\\Controle'
+        jump_qntty = self.count_pdf_files(dir_cl2, dir_cl_outros, dir_cl_controle)
 
         return jump_qntty
     
