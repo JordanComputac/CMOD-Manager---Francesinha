@@ -764,7 +764,7 @@ class ChromeDriverMan:
         
     
     def add_card(self, qntty):
-        breakpoint()
+        
         self.organize_by_date()
         countng = 0
         jujuba = True
@@ -784,8 +784,8 @@ class ChromeDriverMan:
                 
                 print(f"Elemento de número {i} processado!")
                 
-                
-                wanted_element = self.selecting_element(i)
+                time.sleep(2)
+                wanted_element = self.selecting_element(i+qntty)
                 
                 self.driver.execute_script("arguments[0].scrollIntoView(true);", wanted_element)
                 wanted_element.click()
@@ -808,6 +808,7 @@ class ChromeDriverMan:
                         btn_tras = self.driver.find_element(By.XPATH, "(//span[contains(text(), 'Close')])//parent::span[1]")
                         
                     else:
+                        time.sleep(7)
                         btn_preview = self.driver.find_element(By.XPATH, "(//span[contains(text(), 'Preview')])[2]")
                         btn_tras = self.driver.find_element(By.XPATH,f"(//span[contains(text(), 'Close')])[{i+1}]//parent::span[1]")
                     
@@ -822,9 +823,9 @@ class ChromeDriverMan:
                         
                         tras = self.driver.find_element(By. XPATH, "//span[@class='align-right ui-icon ui-icon-trash']")
                         tras.click()
-                        time.sleep(1)
+                        time.sleep(3)
                         self.driver.execute_script("arguments[0].click();", btn_tras)
-
+                        time.sleep(3)
                     except:
                         print("A funcao funcionou normalmente sem interrupcoes")
                 
