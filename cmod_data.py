@@ -114,7 +114,38 @@ class DataManager:
             print(f"Nao foi possivel verificar a existencia do arquivo, tente novamente ou verifique o nome e local do arquivo {excel_file}")
             logging.error(f"Nao foi possivel verificar a existencia do arquivo, tente novamente ou verifique o nome e local do arquivo {excel_file}")
             return ''
+    def verify_item_existence3(self, root, file_name, dir_load):
         
+        root = root.replace('/','.')
+        try:
+                        
+            parent_directory = os.path.dirname(dir_load)
+            dir1 = parent_directory+'\\CL - OUTROS'
+            dir2 = parent_directory+'\\CL - 2'
+            
+            all_files1 = os.listdir(dir1)
+            pdf_files1 = [file for file in all_files1 if file.endswith('.pdf')]
+            print(f"Existem {len(all_files1)} arquivos em CL - OUTROS e {len(pdf_files1)} arquivos pdf")
+            all_files2 = os.listdir(dir2)
+            pdf_files2 = [file for file in all_files2 if file.endswith('.pdf')]
+            print(f"Existem {len(all_files2)} arquivos em CL - 2 e {len(pdf_files2)} arquivos pdf")
+            
+             
+            if root in pdf_files1:
+                Exists = root in pdf_files1
+                print(f"O arquivo {root} existe em {dir1}")
+                return Exists
+            elif root in pdf_files2:
+                Exists = root in pdf_files2
+                print(f"O arquivo {root} existe em {dir2}")
+                return Exists
+
+            else:
+                return False
+        except:
+            print(f"Nao foi possivel verificar a existencia do arquivo, tente novamente ou verifique o nome e local do arquivo {excel_file}")
+            return logging.error(f"Nao foi possivel verificar a existencia do arquivo, tente novamente ou verifique o nome e local do arquivo {excel_file}")
+            
     def verify_item_existence(self, root, file_name, row):
         
         try:
@@ -497,8 +528,11 @@ class DataManager:
         file_name = file_path_outros+'\\controle.xlsx'
         
         pattern = r'(\d{2}/\d{2}/\d{3}\.\d{3}\.\d{3})\s+(\d+/\d+|\d+)\s+([\w\s&]+?)\s+(\d{2}/\d{2}/\d{4})\s+([\d,]+)'
-        #pattern = r'(\d{2}/\d{2}/\d{3}\.\d{3}\.\d{3})\s+(\d+/\d+|\d+)\s+([\w\s&.]+?)\s+(\d{2}/\d{2}/\d{4})\s+(\d{2}/\d{2}/\d{4})\s+([\d,.]+)\s+([\d,.]+[+])?\s+([\d,.]+)\s+(\d+)'
+        
+        pattern1 = r"(\d{2}/\d{2}/\d{3}\.\d{3}\.\d{3})\s+(\d{2}/\d{2}/\d{4})\s+(\d{2}/\d{2}/\d{4})\s+(\d+)"
 
+        pattern2 = r"(\d{2}/\d{2}/\d{3}\.\d{3}\.\d{3})\s+(\d+)\s+([A-ZÁÉÍÓÚÂÊÎÔÛÃÕÇ.\-\s]+)\s+(\d{2}/\d{2}/\d{4})\s+(\d{2}/\d{2}/\d{4})\s+(\d+)"
+        
         indices = []
         gen_infos = []
         cl_numbers = []
@@ -508,9 +542,12 @@ class DataManager:
         for index, row in df.iterrows():            
             
             for col in df.columns:
-                #colls = [colls for colls in df.columns if re.search(pattern, str(row[col]))]
                 
-                if re.search(pattern, str(row[col])):                              
+                
+                #cleann = re.sub(r'\s+', ' ', str(row[col])).strip()
+                #colls = [colls for colls in df.columns if re.search(pattern, str(row[col]))]
+                if re.search(pattern, str(row[col])) or re.search(pattern1, str(row[col])) or re.search(pattern2, str(row[col])): 
+                                             
                     time.sleep(1)
                     indices.append(index)             
                     first_string = df.iloc[index,0]
@@ -521,8 +558,9 @@ class DataManager:
                     print("Não deu match no padrão por enquanto")
                     #return [],[], "alguma diferenca do estado antigo para atual"
                     pass
-            
         
+            
+                
         if len(colls)>0:
             for i in range(len(colls)):
                 
@@ -570,7 +608,7 @@ class DataManager:
                     
                     cl_numbers.append(cl_number)     
                     info_pack1 = {'gen_infos': f'{first_string}', 'cl_number': f'{cl_number}'}
-                    
+                    #breakpoint()
                     status = self.verify_item_existence(file_name, 'controle', f'{first_string}')
                     
                     #False means "do not exist" ---then--> update/insert in the file
@@ -580,11 +618,12 @@ class DataManager:
                         print(f"Realizando atualizacao da lista controle com elemento n°: {i}")
                         if nosso_numero == last_nosso_numero:
                             info_pack = {'gen_infos': 'Lista de CLs ---> ', 'cl_number': f'{cl_numbers}'}
+                            
                             self.update_excel_with_new_row(file_name, info_pack)
                             (f"Realizando atualizacao do elemento separador final da lista controle com elemento n°: {i}")
                     else:
                         print(f"O elemento ja existe na lista de controle ---> volta de número: {i}")                        
-                        return [],[], True
+                        return info_pack1,cl_numbers, True
                 else:   
                     print("CL number is not as fcd as before :) ")
                     logging.warning("CL number is not as fcd as before :) ")
@@ -597,7 +636,7 @@ class DataManager:
                     
                     cl_numbers.append(cl_number)     
                     info_pack1 = {'gen_infos': f'{first_string}', 'cl_number': f'{cl_number}'}
-                    
+                    #breakpoint()
                     status = self.verify_item_existence(file_name, 'controle', f'{first_string}')
                     
                     #False means "do not exist" ---then--> update/insert in the file
@@ -607,12 +646,13 @@ class DataManager:
                         print(f"Realizando atualizacao da lista controle com elemento n°: {i}")
                         if nosso_numero == last_nosso_numero:
                             info_pack = {'gen_infos': 'Lista de CLs ---> ', 'cl_number': f'{cl_numbers}'}
+                            
                             self.update_excel_with_new_row(file_name, info_pack)
                             (f"Realizando atualizacao do elemento separador final da lista controle com elemento n°: {i}")
                     else:
 
                         print(f"O elemento ja existe na lista de controle ---> volta de número: {i}")                        
-                        return [],[], True
+                        return info_pack1,cl_numbers, True
 
                 time.sleep(1)
         else:

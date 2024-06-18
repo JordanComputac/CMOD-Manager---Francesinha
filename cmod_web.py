@@ -948,18 +948,26 @@ class ChromeDriverMan:
 
                 pdf_file = os.path.join(file_path_outros, new_file_handle[i])
                 #text = self.data_man.read_pdf(pdf_file)
-                df = self.data_man.extract_text_from_pdf(pdf_file)
-                data_emissao = self.data_man.get_date_from_df(df)
+                df = self.data_man.extract_text_from_pdf(pdf_file)                
                                 
                 cl_info_dict, indices, status = self.data_man.get_linhas_cl(df, file_path_outros)
+                data_emissao = self.data_man.get_date_from_df(df)              
+               
                 
                 
                 if status == False:
+                    try:
+                        nosso_numer = cl_info_dict['gen_infos'].split()
+                        nosso_numer = nosso_numer[0]
+                        nosso_numer = nosso_numer.replace('/','.')
+                        
+                    except:
+                        nosso_numer = "ERR"
+                        print("Nao foi possivel definir o nosso numero ao renomear o arquivo, verificar se esta retornando valor corretamente")
+                        logging.warning("Nao foi possivel definir o nosso numero ao renomear o arquivo, verificar se esta retornando valor corretamente")
                     
-                    formatted_date = self.rename_it(pdf_file, data_emissao)                    
+                    formatted_date = self.rename_it(pdf_file, data_emissao+' - '+nosso_numer)                    
                     time.sleep(1)
-
-
                     if formatted_date:
 
                         dir = os.path.dirname(file_path_outros)
@@ -987,10 +995,50 @@ class ChromeDriverMan:
                     time.sleep(2)                   
 
                 elif status == True:
+                    
+                    try:
+                        nosso_numer = cl_info_dict['gen_infos'].split()
+                        nosso_numer = nosso_numer[0]
+                        nosso_numer = nosso_numer.replace('/','.')
+                        
+                    except:
+                        nosso_numer = "ERR"
+                        print("Nao foi possivel definir o nosso numero ao renomear o arquivo, verificar se esta retornando valor corretamente")
+                        logging.warning("Nao foi possivel definir o nosso numero ao renomear o arquivo, verificar se esta retornando valor corretamente")
+                    
+                    date = data_emissao+' - '+nosso_numer
+                    statuas = self.data_man.verify_item_existence3(date, nosso_numer, self.download_dir)
+                    
+
                     #os.remove(pdf_file)
-                    date = "ARQUIVO REPETIDO"
-                    formatted_date = self.rename_it(pdf_file, date)
-                    print(f"O arquivo {pdf_file} já foi renomeado e inserido no devido diretorio de destino, excluindo arquivo...")
+                    if statuas == True:
+                        date = "ARQUIVO REPETIDO"
+                        formatted_date = self.rename_it(pdf_file, date)
+                        print(f"O arquivo {date} ja existe no diretorio de destino")
+                        logging.info(f"O arquivo {date} ja existe no diretorio de destino")
+                    else:
+                        formatted_date = self.rename_it(pdf_file, date)                    
+                        time.sleep(1)
+                        if formatted_date:
+
+                            dir = os.path.dirname(file_path_outros)
+                            old_dir = formatted_date
+                            new_plus = os.path.basename(formatted_date)
+                            dir_cl2 = dir + f'\\CL - 2\\{new_plus}'
+                            dir_cl_outros = dir + f'\\CL - OUTROS\\{new_plus}'
+                            
+
+                            if ('2' in indices) or (2 in indices):
+                                new_dir = dir_cl2
+                            else:
+                                new_dir = dir_cl_outros
+                            time.sleep(1)
+                            
+                            self.data_man.send_file(old_dir,new_dir)
+                        else:
+                            print("Nao foi possivel fazer mudanca de diretorio")
+                            logging.warning("Nao foi possivel fazer mudanca de diretorio de arquivo mesmo apos verificacao da nao existencia no diretorio de destino")
+                    #print(f"O arquivo {pdf_file} já foi renomeado e inserido no devido diretorio de destino, excluindo arquivo...")
                 else:
                     print("alguma diferenca do estado antigo para atual")
         else:
