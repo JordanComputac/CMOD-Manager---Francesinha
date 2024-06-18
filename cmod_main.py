@@ -37,7 +37,7 @@ while True:
                 driver = ch_driver.get_driver()
                 ch_driver.get_page()
                 ch_driver.login()
-                task_path, list_of_dir = ch_driver.fill_information_cmod(i)
+                task_path, list_of_dir, ag = ch_driver.fill_information_cmod(i)
                 
                 if task_path == False:
                     print("Algo errado nao está certo no preenchimento das informacoes no acesso ao portal CMOD")
@@ -46,7 +46,7 @@ while True:
                 jump_qntty = ch_driver.rename_n_save(download_dir)
                     
                 #ch_driver.get_item_list(list_of_dir[0])
-                ch_driver.add_card(jump_qntty)
+                ch_driver.add_card(jump_qntty, ag)
             except:
                 print("Há alguma interferência, demora de carregamento ou novo elemento no processo, verificar! ")
                 logging.warning("Há alguma interferência, demora de carregamento ou novo elemento no processo, verificar! ")
@@ -56,6 +56,7 @@ while True:
             print("erro no preenchimento de busca por 'Francesinha - sem nome'")
             break
         print("hello, its'a me, Mario Karte! Acabou um loop de for")
+        driver.quit()
 
     else:
         time.sleep(15)

@@ -209,9 +209,12 @@ class ChromeDriverMan:
             date2_field.send_keys(date2)
 
             #str_ag = '00'+str(ag)
+            time.sleep(3)
             ag_field = self.driver.find_elements(By.XPATH, "//input[@title='Agência']")
             select_ag_field = ag_field[0]
-            select_ag_field.send_keys(ag)
+            select_ag_field.send_keys(ag)            
+            time.sleep(3)
+            
 
             
             str_ag = '00'+str(ag)
@@ -239,7 +242,7 @@ class ChromeDriverMan:
             logging.error("Erro no preenchimento das informacoes do forumulario para busca de arquivos 'Francesinha - 79166' ")
 
         
-        return task_path, list_of_subdir
+        return task_path, list_of_subdir, ag
     
     def list_foward(self, numbar):
 
@@ -759,11 +762,13 @@ class ChromeDriverMan:
 
         wanted_elements = self.driver.find_elements(By.XPATH, "//table[@class = 'gridxRowTable']//child::td[@aria-describedby='gridx_Grid_2-7']")
         wanted_element = wanted_elements[ene]
+        ag_number = self.driver.find_elements(By.XPATH, "//table[@class = 'gridxRowTable']//child::td[@aria-describedby='gridx_Grid_2-5']")
+        ag_number = ag_number[ene]
 
-        return wanted_element
+        return wanted_element, ag_number
         
     
-    def add_card(self, qntty):
+    def add_card(self, qntty, ag):
         
         #CRIAR UM CONTROLE DA QNTDE DE ITENS PROCESSADOS
         
@@ -786,17 +791,22 @@ class ChromeDriverMan:
         result = jumpy*200
         result_ado = qntty - result
         
-        while True:
-            
+        while True:           
             
             for i in range(200-result_ado):
                 
                 print(f"Elemento de número {result_ado+i} processado!")
                 
                 time.sleep(2)
-                wanted_element = self.selecting_element(result_ado+i)
-                
+                wanted_element,ag_number = self.selecting_element(result_ado+i)                
                 self.driver.execute_script("arguments[0].scrollIntoView(true);", wanted_element)
+                ag_number = ag_number.text
+                if str(ag) != str(ag_number):
+                    print("Numero de agencia diferente detectado reiniciar")
+                    logging.warning("Numero de agencia diferente detectado reiniciar")
+                    break
+                else:
+                    pass
                 wanted_element.click()
                 time.sleep(5)
                 
@@ -872,7 +882,11 @@ class ChromeDriverMan:
                 print(f"Esta é a última rodada do loop na última lista de itens disponíveis, terminando processo com {countng} elementos processados")
                 logging.info(f"Esta e a ultima rodada do loop na ultima lista de itens disponiveis, terminando processo com {countng} elementos processados")
                 break
-
+            elif str(ag) != str(ag_number):
+                
+                logging.warning("Numero de agencia diferente detectado reiniciar")
+                return print("Numero de agencia diferente detectado reiniciar")
+                
 
     def count_pdf_files(self, dir_path1, dir_path2, dir_path3):
 
@@ -1006,7 +1020,7 @@ class ChromeDriverMan:
                         print("Nao foi possivel definir o nosso numero ao renomear o arquivo, verificar se esta retornando valor corretamente")
                         logging.warning("Nao foi possivel definir o nosso numero ao renomear o arquivo, verificar se esta retornando valor corretamente")
                     
-                    date = data_emissao+' - '+nosso_numer
+                    date = data_emissao+' - '+nosso_numer+'.pdf'
                     statuas = self.data_man.verify_item_existence3(date, nosso_numer, self.download_dir)
                     
 
